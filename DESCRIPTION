@@ -1,0 +1,29 @@
+Package: penR1FPLS
+Type: Package
+Title: Penalized rank-one Functional Partial Least Squares regression
+Version: 0.1.0
+Author: Harold A. Hernández-Roig; M. Carmen Aguilera-Morillo; Eleonora Arnone; 
+    Rosa E. Lillo; Laura M. Sangalli
+Maintainer: Harold A. Hernández-Roig <hhroig@gmail.com>
+Description: This packages implements several penalized methods for Functional 
+    Partial Least Squares (FPLS) regression described in the article "Penalized 
+    rank-one approximation to functional partial least-squares regression over
+    complex domains".
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: 
+    caret,
+    expm,
+    fda,
+    fdaPDE,
+    foreach,
+    geometry,
+    Matrix,
+    mgcv,
+    pls,
+    pROC,
+    stats,
+    tictoc
