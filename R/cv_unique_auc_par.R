@@ -129,10 +129,10 @@ cv_unique_auc_par <- function(X,
     i <- row_lambda <- NULL
 
     AUC_lambda_fold <- foreach::foreach (i = 1:num_folds,
-                                         .packages = c("pROC"),
+                                         .packages = c("pROC", "penR1FPLS"),
                                          .combine = "cbind") %:%
       foreach::foreach(row_lambda = 1:length(penalty_grid),
-                       .packages = c("pROC"),
+                       .packages = c("pROC", "penR1FPLS"),
                        .combine = 'c' ) %dopar%
       {
 

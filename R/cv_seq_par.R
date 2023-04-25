@@ -99,8 +99,10 @@ cv_seq_par <- function(X,
 
     MSE_lambda_fold <-
       foreach::foreach(i = 1:num_folds,
+                       .packages = c("penR1FPLS"),
                        .combine = "cbind") %:%
       foreach::foreach(row_lambda = 1:nrow(penalty_grid),
+                       .packages = c("penR1FPLS"),
                        .combine = 'c' ) %dopar%
       {
 
