@@ -8,7 +8,7 @@
 #' @param ncomp number of components, integer.
 #' @param center logical, indicating if data should be to centered.
 #' @param basisobj a basis object from package \code{fda}.
-#' @param method one of: "r1fpls_fem", "fpls_tps", "r1fpls_bs", or "fpls_bs".
+#' @param method one of: "r1fpls_fem", "fpls_tps",  "fpls_tps3", "r1fpls_bs", or "fpls_bs".
 #' @param penalty a vector of size ncomp indicating the penalty for each component.
 #' @param tol convergence tolerance.
 #' @param verbose logical, indicating if messages should be printed.
@@ -117,13 +117,14 @@ sofr <- function(X,
 
   # Select fit function:
 
-  method <- match.arg(method, c("r1fpls_fem", "r1fpls_bs", "fpls_bs", "fpls_tps"))
+  method <- match.arg(method, c("r1fpls_fem", "r1fpls_bs", "fpls_bs", "fpls_tps", "fpls_tps3"))
 
   fitFunc <- switch(method,
                     r1fpls_fem = r1fpls_fem,
                     r1fpls_bs = r1fpls_bs,
                     fpls_bs = fpls_bs,
-                    fpls_tps = fpls_tps
+                    fpls_tps = fpls_tps,
+                    fpls_tps3 = fpls_tps3
   )
 
   res <- fitFunc(X = X, Y = Y, argvals = argvals, ncomp = ncomp, center = center,

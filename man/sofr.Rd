@@ -38,7 +38,7 @@ sofr(
 
 \item{basisobj}{a basis object from package \code{fda}.}
 
-\item{method}{one of: "r1fpls_fem", "fpls_tps", "r1fpls_bs", or "fpls_bs".}
+\item{method}{one of: "r1fpls_fem", "fpls_tps",  "fpls_tps3", "r1fpls_bs", or "fpls_bs".}
 
 \item{penalty}{a vector of size ncomp indicating the penalty for each component.}
 
