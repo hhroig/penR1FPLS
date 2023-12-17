@@ -12,6 +12,7 @@ fpls_tps3(
   ncomp = 3,
   center = TRUE,
   nbasis,
+  FEM_basisobj = NULL,
   penalty = 0,
   tol = .Machine$double.eps^0.5,
   verbose = TRUE,
@@ -33,6 +34,9 @@ fpls_tps3(
 \item{center}{logical, indicating if data should be to centered.}
 
 \item{nbasis}{number of TPS basis to use.}
+
+\item{FEM_basisobj}{Finite Elements basis for numerical integration of R0,
+not needed if R0 is provided.}
 
 \item{penalty}{penalty value, numeric.}
 
@@ -59,5 +63,45 @@ Penalized functional PLS based on the (3D) TPS representation of the data.
 Inspired by Aguilera et al. 2016.
 }
 \examples{
-#
+
+# Generate some artificial data
+data(sphere3Ddata, package = "fdaPDE")
+nodes=sphere3Ddata$nodes
+tetrahedrons=sphere3Ddata$tetrahedrons
+
+new3d_data <- generate_3d_data(nodes = nodes,
+                               tetrahedrons = tetrahedrons,
+                               num_samples = 30,
+                               beta_num = 3,
+                               Rsq = 0.9)
+
+res_pls <- fpls_tps3(X = new3d_data$X,
+                     Y =new3d_data$Y,
+                     nodes,
+                     ncomp = 3,
+                     center = TRUE,
+                     nbasis = 20,
+                     FEM_basisobj = new3d_data$basisobj,
+                     penalty = 10,
+                     tol = .Machine$double.eps^0.5,
+                     verbose = TRUE,
+                     stripped = FALSE,
+                     R0 = NULL,
+                     P = NULL )
+
+ # library(plotly)
+ # fig_coeff_T <- plot_ly(x = ~nodes[, 1], y = ~nodes[, 2], z = ~nodes[, 3],
+ #       marker = list(color = ~ as.numeric(new3d_data$coefficient_function),
+ #       colorscale = c('#FFE1A1', '#683531'), showscale = TRUE))
+ # fig_coeff_T <- fig_coeff_T \%>\% add_markers( alpha = 0.2)
+ # fig_coeff_T
+ #
+ #
+ # fig_coeff_est <- plot_ly(x = ~nodes[, 1],
+ #                          y = ~nodes[, 2],
+ #                          z = ~nodes[, 3],
+ #   marker = list(color = ~ as.numeric(res_pls$coefficient_function[, , 3]),
+ #   colorscale = c('#FFE1A1', '#683531'), showscale = TRUE))
+ # fig_coeff_est <- fig_coeff_est \%>\% add_markers( alpha = 0.2)
+ # fig_coeff_est
 }

@@ -7,6 +7,8 @@
 #' @param ncomp number of components, integer.
 #' @param center logical, indicating if data should be to centered.
 #' @param nbasis number of TPS basis to use.
+#' @param FEM_basisobj Finite Elements basis for numerical integration of R0,
+#' not needed if R0 is provided.
 #' @param penalty penalty value, numeric.
 #' @param tol convergence tolerance.
 #' @param verbose logical, indicating if messages should be printed.
@@ -22,20 +24,61 @@
 #' @export
 #'
 #' @examples
-#' #
+#'
+#' # Generate some artificial data
+#' data(sphere3Ddata, package = "fdaPDE")
+#' nodes=sphere3Ddata$nodes
+#' tetrahedrons=sphere3Ddata$tetrahedrons
+#'
+#' new3d_data <- generate_3d_data(nodes = nodes,
+#'                                tetrahedrons = tetrahedrons,
+#'                                num_samples = 30,
+#'                                beta_num = 3,
+#'                                Rsq = 0.9)
+#'
+#' res_pls <- fpls_tps3(X = new3d_data$X,
+#'                      Y =new3d_data$Y,
+#'                      nodes,
+#'                      ncomp = 3,
+#'                      center = TRUE,
+#'                      nbasis = 20,
+#'                      FEM_basisobj = new3d_data$basisobj,
+#'                      penalty = 10,
+#'                      tol = .Machine$double.eps^0.5,
+#'                      verbose = TRUE,
+#'                      stripped = FALSE,
+#'                      R0 = NULL,
+#'                      P = NULL )
+#'
+#'  # library(plotly)
+#'  # fig_coeff_T <- plot_ly(x = ~nodes[, 1], y = ~nodes[, 2], z = ~nodes[, 3],
+#'  #       marker = list(color = ~ as.numeric(new3d_data$coefficient_function),
+#'  #       colorscale = c('#FFE1A1', '#683531'), showscale = TRUE))
+#'  # fig_coeff_T <- fig_coeff_T %>% add_markers( alpha = 0.2)
+#'  # fig_coeff_T
+#'  #
+#'  #
+#'  # fig_coeff_est <- plot_ly(x = ~nodes[, 1],
+#'  #                          y = ~nodes[, 2],
+#'  #                          z = ~nodes[, 3],
+#'  #   marker = list(color = ~ as.numeric(res_pls$coefficient_function[, , 3]),
+#'  #   colorscale = c('#FFE1A1', '#683531'), showscale = TRUE))
+#'  # fig_coeff_est <- fig_coeff_est %>% add_markers( alpha = 0.2)
+#'  # fig_coeff_est
 fpls_tps3 <- function(X,
-                     Y,
-                     nodes,
-                     ncomp = 3,
-                     center = TRUE,
-                     nbasis,
-                     penalty = 0,
-                     tol = .Machine$double.eps^0.5,
-                     verbose = TRUE,
-                     stripped = FALSE,
-                     R0 = NULL,
-                     P = NULL,
-                     ...
+                      Y,
+                      nodes,
+                      ncomp = 3,
+                      center = TRUE,
+                      nbasis,
+                      FEM_basisobj = NULL,
+                      penalty = 0,
+                      tol = .Machine$double.eps^0.5,
+                      verbose = TRUE,
+                      stripped = FALSE,
+                      R0 = NULL,
+                      P = NULL,
+                      ...
 ) {
 
   tictoc::tic("FPLS-TPS")
@@ -93,9 +136,36 @@ fpls_tps3 <- function(X,
   Psi <- stats::model.matrix(gam_fit)
   tPsi <- Matrix::t(Psi)
 
+
+
   # Matrix of inner products (mass):
   if (is.null(R0)) {
-    stop("Please provide the R0 matrix")
+
+    if (is.null(FEM_basisobj)) {
+      stop("Please provide the R0 matrix or a FEM basis object.")  }
+
+    # compute mass matrix from Finite Elements basis:
+    R0_FEM <- mass_mat_fun(FEMbasis = FEM_basisobj)
+
+    # Matrix of inner products (mass):
+    R0tps <- matrix(NA, nrow = ncol(Psi), ncol = ncol(Psi))
+
+    # numerical approx. of the inner products:
+    for (i in 1:nrow(R0tps)) {
+      for (j in i:ncol(R0tps)) {
+
+        R0tps[i,j] <- as.numeric(
+          t(Psi[, i, drop = F]) %*% R0_FEM %*% (Psi[, j, drop = F])
+        )
+
+      } #j
+    } #i
+
+    R0tps[lower.tri(R0tps)] <- R0tps[upper.tri(R0tps)]
+    colnames(R0tps) <- rownames(R0tps) <- NULL
+
+    R0 <- R0tps
+    rm(R0tps, R0_FEM)
   }
 
 
